@@ -1,8 +1,8 @@
-import express, { query } from 'express'
+import express from 'express'
 import cors from 'cors'
 import { createServer } from 'http'
-import mariadb from 'mariadb'
 import jwt from 'jsonwebtoken'
+import * as db from './dbConnection.js'
 
 const port = 3000
 const secretKey = 'secret'
@@ -12,46 +12,23 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
-const db = mariadb.createPool({
-	host: 'localhost',
-	user: 'root',
-	password: '2402',
-	database: 'pruebas',
-	port: 3306,
-	acquireTimeout: 10000,
-	conexionLimit: 5
-})
-
-// function verifyToken(req, res, header){
-// 	const header = req.header
-// 	const token = header.split(" ")[0]
-// 	if(!token){
-// 		return res.status(401).json({message: "Token not provided"})
-// 	}
-// 	try{
-// 		const payload = jwt.verify(token, secretKey)
-// 		req.username =    
-// 	}
-// }
-
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
+	const {identification, passwordHash} = req.body
+	let dbResponse
 	try{
-		console.log('ejectutando')
-		const { id, password } = req.body
-		let connection = db.getConnection()
-		// let query = connection.query('SELECT * FROM users')
-		// console.log(query)
+		dbResponse = await db.login(req.body)
+		if(dbResponse.length == 0){
+			res.status(404).send('Usuario no encontrado')
+		}else if(dbResponse[0].passwordSHA256 != passwordHash){
+			res.status(401).send('Contraseña Incorrecta')
+		}else{
+			res.status(200).send(dbResponse[0])
+		}
 	}catch(err){
 		console.log(err)
 		res.status(500).send('error del servidor')
-	}finally{
-		connection.end()
 	}
 })
-
-// app.post('/api/registerUser', verifyToken, (req, res) => {
-
-// })
 
 const server = createServer(app)
 server.listen(port, () => {
