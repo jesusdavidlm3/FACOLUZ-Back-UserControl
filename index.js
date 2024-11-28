@@ -3,9 +3,10 @@ import cors from 'cors'
 import { createServer } from 'http'
 import jwt from 'jsonwebtoken'
 import * as db from './dbConnection.js'
+import { v4 as UIDgenerator } from 'uuid';
 
-const port = 3000
-const secretKey = 'secret'
+const port = process.env.PORT
+const secret = process.env.SECRET
 
 const app = express()
 app.use(cors())
@@ -22,11 +23,29 @@ app.post('/api/login', async (req, res) => {
 		}else if(dbResponse[0].passwordSHA256 != passwordHash){
 			res.status(401).send('Contraseña Incorrecta')
 		}else{
-			res.status(200).send(dbResponse[0])
+			const token = jwt.sign({
+				id: dbResponse[0].id,
+				name: dbResponse[0].name,
+				type: dbResponse[0].type,
+				exp: Date.now() + 600000
+			}, secret)
+			res.status(200).send({...dbResponse[0], jwt: token})
 		}
 	}catch(err){
 		console.log(err)
 		res.status(500).send('error del servidor')
+	}
+})
+
+app.get('/api/getAllUsers', (req, res) => {
+	const token = req.headers.authorization.split(" ")[1]
+	const payload = jwt.verify(token, secret)
+
+	if(Date().now > payload.exp){
+		res.status(401).send('Sesion expirada')
+	}else{
+		let dbResponse
+		
 	}
 })
 

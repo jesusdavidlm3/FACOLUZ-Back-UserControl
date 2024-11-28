@@ -23,3 +23,16 @@ export async function login(data){
 		connection.release()
 	}
 }
+
+export async function getAllUsers() {
+	let connection
+	try{
+		connection = await db.getConnection()
+		const list = await connection.query('SELECT * FROM users')
+		return list
+	}catch(err){
+		return err
+	}finally{
+		connection.release()
+	}
+}
