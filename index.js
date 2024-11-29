@@ -12,6 +12,19 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
+function verifyToken(req, res, next){
+	try{
+		const token = req.headers.authorization.split(" ")[1]
+		const payload = jwt.verify(token, secret)
+		if(Date().now > payload.exp){
+			res.status(401).send('Sesion expirada')
+		}
+		next()
+	}catch(err){
+		return res.status(401).send('Token no válido');
+	}
+}
+
 app.post('/api/login', async (req, res) => {
 	const {identification, passwordHash} = req.body
 	let dbResponse
@@ -38,33 +51,28 @@ app.post('/api/login', async (req, res) => {
 	}
 })
 
-app.get('/api/getAllUsers', async (req, res) => {
-	const token = req.headers.authorization.split(" ")[1]
-	const payload = jwt.verify(token, secret)
+app.get('/api/getAllUsers', verifyToken, async (req, res) => {
+	let dbResponse = await db.getAllUsers()
+	res.status(200).send(dbResponse)
+})
 
-	if(Date().now > payload.exp){
-		res.status(401).send('Sesion expirada')
-	}else{
-		let dbResponse = await db.getAllUsers()
+app.post('/api/createUser', verifyToken, async (req, res) => {
+	try{
+		let dbResponse = await db.createUser(req.body)
 		res.status(200).send(dbResponse)
+	}catch(err){
+		console.log(err)
+		res.status(500).send('Error del servidor')
 	}
 })
 
-app.post('/api/createUser', async (req, res) => {
-	const token = req.headers.authorization.split(" ")[1]
-	const payload = jwt.verify(token, secret)
-	console.log(req.body)
-
-	if(Date().now > payload.exp){
-		res.status(401).send('Sesion expirada')
-	}else{
-		try{
-			let dbResponse = await db.createUser(req.body)
-			res.status(200).send(dbResponse)
-		}catch(err){
-			console.log(err)
-			res.status(500).send('Error del servidor')
-		}
+app.delete('/api/deleteUser/:id', verifyToken, async (req, res) => {
+	try{
+		let dbResponse = await db.deleteUser(req.params.id)
+		res.status(200).send(dbResponse)
+	}catch(err){
+		console.log(err)
+		res.status(500).send('error del servidor')
 	}
 })
 

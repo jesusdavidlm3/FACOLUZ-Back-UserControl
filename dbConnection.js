@@ -30,7 +30,7 @@ export async function getAllUsers() {
 	let connection
 	try{
 		connection = await db.getConnection()
-		const list = await connection.query('SELECT * FROM users')
+		const list = await connection.query('SELECT * FROM users WHERE active = 1')
 		return list
 	}catch(err){
 		return err
@@ -49,6 +49,21 @@ export async function createUser(data) {
 		const res = await connection.query(`
 			INSERT INTO users(id, name, lastname, passwordSHA256, type, identification, identificationType) VALUES(?, ?, ?, ?, ?, ?, ?)
 		`, [uid, name, lastname, password, userType, idNumber, idType])
+		console.log(res)
+	}catch(err){
+		return err
+	}finally{
+		connection.release()
+	}
+}
+
+export async function deleteUser(id){
+	let connection
+	try{
+		connection = await db.getConnection()
+		const res = await connection.query(`
+			UPDATE users SET active = 0 WHERE id = ?
+		`, [id])
 		console.log(res)
 	}catch(err){
 		return err
