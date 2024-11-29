@@ -56,6 +56,11 @@ app.get('/api/getAllUsers', verifyToken, async (req, res) => {
 	res.status(200).send(dbResponse)
 })
 
+app.get('/api/getDeactivatedUsers', verifyToken, async (req, res) => {
+	let dbResponse = await db.getDeactivatedUsers()
+	res.status(200).send(dbResponse)
+})
+
 app.post('/api/createUser', verifyToken, async (req, res) => {
 	try{
 		let dbResponse = await db.createUser(req.body)
@@ -75,6 +80,27 @@ app.delete('/api/deleteUser/:id', verifyToken, async (req, res) => {
 		res.status(500).send('error del servidor')
 	}
 })
+
+app.patch('/api/reactivateUser', verifyToken, async (req, res) => {
+	console.log(req.body)
+	try{
+		let dbResponse = await db.reactivateUser(req.body)
+		res.status(200).send(dbResponse)
+	}catch(err){
+		console.log(err)
+		res.status(500).send('error del servidor')
+	}
+})
+
+// app.patch('/api/editUser', verifyToken, async (req, res) => {
+// 	try{
+// 		let dbResponse = await db.
+// 		res.status(200).send(dbResponse)
+// 	}catch(err){
+// 		console.log(err)
+// 		res.status(500).send('error del servidor')
+// 	}
+// })
 
 const server = createServer(app)
 server.listen(port, () => {

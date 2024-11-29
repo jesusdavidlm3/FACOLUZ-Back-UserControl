@@ -39,6 +39,19 @@ export async function getAllUsers() {
 	}
 }
 
+export async function getDeactivatedUsers() {
+	let connection
+	try{
+		connection = await db.getConnection()
+		const list = await connection.query('SELECT * FROM users WHERE active = 0')
+		return list
+	}catch(err){
+		return err
+	}finally{
+		connection.release()
+	}
+}
+
 export async function createUser(data) {
 	console.log(data)
 	const {idType, idNumber, name, lastname, password, userType} = data
@@ -71,3 +84,24 @@ export async function deleteUser(id){
 		connection.release()
 	}
 }
+
+export async function reactivateUser(data){
+	const {id, newPassword} = data
+	console.log(data)
+	let connection
+	try{
+		connection = await db.getConnection()
+		const res = await connection.query(`
+			UPDATE users SET active = 1, passwordSHA256 = ? WHERE id = ?
+		`, [newPassword, id])
+		console.log(res)
+	}catch(err){
+		return err
+	}finally{
+		connection.release()
+	}
+}
+
+// export async function editUser(data) {
+// 	const {  } = data
+// }
