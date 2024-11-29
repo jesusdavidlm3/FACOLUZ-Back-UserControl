@@ -3,7 +3,6 @@ import cors from 'cors'
 import { createServer } from 'http'
 import jwt from 'jsonwebtoken'
 import * as db from './dbConnection.js'
-import { v4 as UIDgenerator } from 'uuid';
 
 const port = process.env.PORT
 const secret = process.env.SECRET
@@ -22,6 +21,8 @@ app.post('/api/login', async (req, res) => {
 			res.status(404).send('Usuario no encontrado')
 		}else if(dbResponse[0].passwordSHA256 != passwordHash){
 			res.status(401).send('Contraseña Incorrecta')
+		}else if(dbResponse[0].active == false){
+			res.status(404).send('Este usuario se encuentra inactivo')
 		}else{
 			const token = jwt.sign({
 				id: dbResponse[0].id,
@@ -37,15 +38,33 @@ app.post('/api/login', async (req, res) => {
 	}
 })
 
-app.get('/api/getAllUsers', (req, res) => {
+app.get('/api/getAllUsers', async (req, res) => {
 	const token = req.headers.authorization.split(" ")[1]
 	const payload = jwt.verify(token, secret)
 
 	if(Date().now > payload.exp){
 		res.status(401).send('Sesion expirada')
 	}else{
-		let dbResponse
-		
+		let dbResponse = await db.getAllUsers()
+		res.status(200).send(dbResponse)
+	}
+})
+
+app.post('/api/createUser', async (req, res) => {
+	const token = req.headers.authorization.split(" ")[1]
+	const payload = jwt.verify(token, secret)
+	console.log(req.body)
+
+	if(Date().now > payload.exp){
+		res.status(401).send('Sesion expirada')
+	}else{
+		try{
+			let dbResponse = await db.createUser(req.body)
+			res.status(200).send(dbResponse)
+		}catch(err){
+			console.log(err)
+			res.status(500).send('Error del servidor')
+		}
 	}
 })
 
