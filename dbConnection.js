@@ -116,3 +116,18 @@ export async function changePassword(data) {
 		connection.release()
 	}
 }
+
+export async function changeUserType(data) {
+	const { userId, newType } = data
+	let connection
+	try{
+		connection = await db.getConnection()
+		const res = await connection.query(`
+			UPDATE users SET type = ? WHERE id = ?
+		`, [newType, userId])
+	}catch(err){
+		return err
+	}finally{
+		connection.release()
+	}
+}
