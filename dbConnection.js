@@ -52,7 +52,7 @@ export async function getDeactivatedUsers() {
 	}
 }
 
-export async function createUser(data) {
+export async function createUser(data, currentUser) {
 	console.log(data)
 	const {idType, idNumber, name, lastname, password, userType} = data
 	const uid = UIDgenerator()
@@ -62,6 +62,7 @@ export async function createUser(data) {
 		const res = await connection.query(`
 			INSERT INTO users(id, name, lastname, passwordSHA256, type, identification, identificationType) VALUES(?, ?, ?, ?, ?, ?, ?)
 		`, [uid, name, lastname, password, userType, idNumber, idType])
+		generateLogs(0, uid, currentUser)
 		console.log(res)
 	}catch(err){
 		return err
@@ -70,13 +71,14 @@ export async function createUser(data) {
 	}
 }
 
-export async function deleteUser(id){
+export async function deleteUser(id, currentUser){
 	let connection
 	try{
 		connection = await db.getConnection()
 		const res = await connection.query(`
 			UPDATE users SET active = 0 WHERE id = ?
 		`, [id])
+		generateLogs(1, userId, currentUser)
 		console.log(res)
 	}catch(err){
 		return err
@@ -85,7 +87,7 @@ export async function deleteUser(id){
 	}
 }
 
-export async function reactivateUser(data){
+export async function reactivateUser(data, currentUser){
 	const {id, newPassword} = data
 	console.log(data)
 	let connection
@@ -94,6 +96,7 @@ export async function reactivateUser(data){
 		const res = await connection.query(`
 			UPDATE users SET active = 1, passwordSHA256 = ? WHERE id = ?
 		`, [newPassword, id])
+		generateLogs(2, id, currentUser)
 		console.log(res)
 	}catch(err){
 		return err
@@ -102,7 +105,7 @@ export async function reactivateUser(data){
 	}
 }
 
-export async function changePassword(data) {
+export async function changePassword(data, currentUser) {
 	const {userId, newPassword} = data
 	let connection
 	try{
@@ -110,6 +113,7 @@ export async function changePassword(data) {
 		const res = await connection.query(`
 			UPDATE users SET passwordSHA256 = ? WHERE id = ?
 		`, [newPassword, userId])
+		generateLogs(3, userId, currentUser)
 	}catch(err){
 		return err
 	}finally{
@@ -117,7 +121,7 @@ export async function changePassword(data) {
 	}
 }
 
-export async function changeUserType(data) {
+export async function changeUserType(data, currentUser) {
 	const { userId, newType } = data
 	let connection
 	try{
@@ -125,8 +129,25 @@ export async function changeUserType(data) {
 		const res = await connection.query(`
 			UPDATE users SET type = ? WHERE id = ?
 		`, [newType, userId])
+		generateLogs(4, userId, currentUser)
 	}catch(err){
 		return err
+	}finally{
+		connection.release()
+	}
+}
+
+async function generateLogs(changeType, modificated, modificator){
+	let connection
+	const uid = UIDgenerator()
+	const dateTime = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()} ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`
+	try{
+		connection = await db.getConnection()
+		const res = await connection.query(`
+			INSERT INTO changelogs(id, changetype, datetime, usermodificatorId, usermodificatedId) VALUES(?, ?, ?, ?, ?)
+		`, [uid, changeType, dateTime, modificator, modificated])
+	}catch(err){
+		console.log(err)
 	}finally{
 		connection.release()
 	}
