@@ -170,6 +170,16 @@ app.patch('/api/changeUserType', tokenVerification.forSysAdmins, async (req, res
 	}
 })
 
+app.get('/api/getAllChangeLogs', tokenVerification.forSysAdmins, async (req, res) => {
+	try{
+		let dbResponse = await db.getLogs()
+		res.status(200).send(dbResponse)
+	}catch(err){
+		console.log(err)
+		res.status(500).send('error del servidor')
+	}
+})
+
 const server = createServer(app)
 server.listen(port, () => {
 	console.log('Su puerto es: 3000')

@@ -152,3 +152,21 @@ async function generateLogs(changeType, modificated, modificator){
 		connection.release()
 	}
 }
+
+export async function getLogs() {
+	let connection
+	try{
+		connection = await db.getConnection()
+		const list = await connection.query(`
+			SELECT changelogs.dateTime, changelogs.changeType, modificated.name AS modificatedName, modificated.lastname AS modificatedLastname, modificator.name AS modificatorName, modificator.lastname AS modificatorLastname
+			FROM changelogs
+			JOIN users AS modificated ON changelogs.userModificatedId = modificated.id
+			JOIN users AS modificator ON changelogs.userModificatorId = modificator.id
+		`)
+		return list
+	}catch(err){
+		return err
+	}finally{
+		connection.release()
+	}
+}
