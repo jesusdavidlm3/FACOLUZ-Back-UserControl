@@ -140,6 +140,16 @@ app.patch('/api/reactivateUser', tokenVerification.forSysAdmins, async (req, res
 	}
 })
 
+app.patch('/api/changePassword', tokenVerification.forSysAdmins, async (req, res) => {
+	try{
+		let dbResponse = await db.changePassword(req.body)
+		res.status(200).send(dbResponse)
+	}catch(err){
+		console.log(err)
+		res.status(500).send('error del servidor')
+	}
+})
+
 const server = createServer(app)
 server.listen(port, () => {
 	console.log('Su puerto es: 3000')

@@ -102,6 +102,17 @@ export async function reactivateUser(data){
 	}
 }
 
-// export async function editUser(data) {
-// 	const {  } = data
-// }
+export async function changePassword(data) {
+	const {userId, newPassword} = data
+	let connection
+	try{
+		connection = await db.getConnection()
+		const res = await connection.query(`
+			UPDATE users SET passwordSHA256 = ? WHERE id = ?
+		`, [newPassword, userId])
+	}catch(err){
+		return err
+	}finally{
+		connection.release()
+	}
+}
