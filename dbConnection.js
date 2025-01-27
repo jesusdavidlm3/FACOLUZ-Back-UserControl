@@ -3,13 +3,13 @@ import { v4 as UIDgenerator } from 'uuid';
 
 
 const db = mariadb.createPool({
-	host: 'localhost',
-	user: 'root',
-	password: '2402',
-	database: 'faco-luz',
-	port: 3306,
-	acquireTimeout: 10000,
-	conexionLimit: 5
+	host: process.env.BDD_HOST,
+	user: process.env.BDD_USER,
+	password: process.env.BDD_PASSWORD,
+	database: process.env.BDD_DATABASE,
+	port: process.env.BDD_PORT,
+	acquireTimeout: process.env.BDD_TIMEOUT,
+	conexionLimit: process.env.BDD_CONECTION_LIMITS
 })
 
 export async function login(data){
