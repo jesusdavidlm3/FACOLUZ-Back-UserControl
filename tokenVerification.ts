@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken'
-const secret = process.env.SECRET
+import jwt from 'npm:jsonwebtoken'
+const secret = Deno.env.get("SECRET")
 
 
 export function forTeachOrStud(req, res, next){

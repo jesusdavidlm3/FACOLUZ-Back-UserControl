@@ -1,15 +1,14 @@
-import mariadb from 'mariadb'
-import { v4 as UIDgenerator } from 'uuid';
+import mariadb from 'npm:mariadb'
 
 
 const db = mariadb.createPool({
-	host: process.env.BDD_HOST,
-	user: process.env.BDD_USER,
-	password: process.env.BDD_PASSWORD,
-	database: process.env.BDD_DATABASE,
-	port: process.env.BDD_PORT,
-	acquireTimeout: process.env.BDD_TIMEOUT,
-	conexionLimit: process.env.BDD_CONECTION_LIMITS
+	host: Deno.env.get("BDD_HOST"),
+	user: Deno.env.get("BDD_USER"),
+	password: Deno.env.get("BDD_PASSWORD"),
+	database: Deno.env.get("BDD_DATABASE"),
+	port: Deno.env.get("BDD_PORT"),
+	acquireTimeout: Deno.env.get("BDD_TIMEOUT"),
+	conexionLimit: Deno.env.get("BDD_CONECTION_LIMITS")
 })
 
 export async function login(data){
@@ -22,7 +21,7 @@ export async function login(data){
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
@@ -35,7 +34,7 @@ export async function getAllUsers() {
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
@@ -48,14 +47,14 @@ export async function getDeactivatedUsers() {
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
 export async function createUser(data, currentUser) {
 	console.log(data)
 	const {idType, idNumber, name, lastname, password, userType} = data
-	const uid = UIDgenerator()
+	const uid = crypto.randomUUID()
 	let connection
 	try{
 		connection = await db.getConnection()
@@ -67,7 +66,7 @@ export async function createUser(data, currentUser) {
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
@@ -78,12 +77,12 @@ export async function deleteUser(id, currentUser){
 		const res = await connection.query(`
 			UPDATE users SET active = 0 WHERE id = ?
 		`, [id])
-		generateLogs(1, userId, currentUser)
+		generateLogs(1, id, currentUser)
 		console.log(res)
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
@@ -101,7 +100,7 @@ export async function reactivateUser(data, currentUser){
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
@@ -117,7 +116,7 @@ export async function changePassword(data, currentUser) {
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
@@ -133,13 +132,13 @@ export async function changeUserType(data, currentUser) {
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
 async function generateLogs(changeType, modificated, modificator){
 	let connection
-	const uid = UIDgenerator()
+	const uid = crypto.randomUUID()
 	const dateTime = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()} ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`
 	try{
 		connection = await db.getConnection()
@@ -149,7 +148,7 @@ async function generateLogs(changeType, modificated, modificator){
 	}catch(err){
 		console.log(err)
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
 
@@ -167,6 +166,6 @@ export async function getLogs() {
 	}catch(err){
 		return err
 	}finally{
-		connection.release()
+		connection?.release()
 	}
 }
