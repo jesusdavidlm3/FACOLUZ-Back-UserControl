@@ -1,5 +1,6 @@
 import mariadb from 'npm:mariadb'
-
+import * as t from './interfaces.ts'
+import "jsr:@std/dotenv/load";
 
 const db = mariadb.createPool({
 	host: Deno.env.get("BDD_HOST"),
