@@ -14,7 +14,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
 app.post('/api/login', async (req, res) => {
-	const {identification, passwordHash} = req.body
+	const {passwordHash} = req.body
 	let dbResponse
 	try{
 		dbResponse = await db.login(req.body)
@@ -42,12 +42,12 @@ app.post('/api/login', async (req, res) => {
 })
 
 app.get('/api/getAllUsers', tokenVerification.forSysAdmins, async (req, res) => {
-	let dbResponse = await db.getAllUsers()
+	const dbResponse = await db.getAllUsers()
 	res.status(200).send(dbResponse)
 })
 
 app.get('/api/getDeactivatedUsers', tokenVerification.forSysAdmins, async (req, res) => {
-	let dbResponse = await db.getDeactivatedUsers()
+	const dbResponse = await db.getDeactivatedUsers()
 	res.status(200).send(dbResponse)
 })
 
@@ -55,8 +55,8 @@ app.post('/api/createUser', tokenVerification.forSysAdmins, async (req, res) => 
 	const token = req.headers.authorization.split(" ")[1]
 	const payload = jwt.verify(token, secret)
 	try{
-		let dbResponse = await db.createUser(req.body, payload.id)
-		res.status(200).send(dbResponse)
+		const _dbResponse = await db.createUser(req.body, payload.id)
+		res.status(200).send("Creado con exito")
 	}catch(err){
 		console.log(err)
 		res.status(500).send('Error del servidor')
@@ -67,8 +67,8 @@ app.delete('/api/deleteUser/:id', tokenVerification.forSysAdmins, async (req, re
 	const token = req.headers.authorization.split(" ")[1]
 	const payload = jwt.verify(token, secret)
 	try{
-		let dbResponse = await db.deleteUser(req.params.id, payload.id)
-		res.status(200).send(dbResponse)
+		const _dbResponse = await db.deleteUser(req.params.id, payload.id)
+		res.status(200).send("Borrado con exito")
 	}catch(err){
 		console.log(err)
 		res.status(500).send('error del servidor')
@@ -80,8 +80,8 @@ app.patch('/api/reactivateUser', tokenVerification.forSysAdmins, async (req, res
 	const token = req.headers.authorization.split(" ")[1]
 	const payload = jwt.verify(token, secret)
 	try{
-		let dbResponse = await db.reactivateUser(req.body, payload.id)
-		res.status(200).send(dbResponse)
+		const _dbResponse = await db.reactivateUser(req.body, payload.id)
+		res.status(200).send("Usuario reactivado")
 	}catch(err){
 		console.log(err)
 		res.status(500).send('error del servidor')
@@ -92,8 +92,8 @@ app.patch('/api/changePassword', tokenVerification.forSysAdmins, async (req, res
 	const token = req.headers.authorization.split(" ")[1]
 	const payload = jwt.verify(token, secret)
 	try{
-		let dbResponse = await db.changePassword(req.body, payload.id)
-		res.status(200).send(dbResponse)
+		const _dbResponse = await db.changePassword(req.body, payload.id)
+		res.status(200).send("Contraseña cambiada")
 	}catch(err){
 		console.log(err)
 		res.status(500).send('error del servidor')
@@ -104,8 +104,8 @@ app.patch('/api/changeUserType', tokenVerification.forSysAdmins, async (req, res
 	const token = req.headers.authorization.split(" ")[1]
 	const payload = jwt.verify(token, secret)
 	try{	
-		let dbResponse = await db.changeUserType(req.body, payload.id)
-		res.status(200).send(dbResponse)
+		const _dbResponse = await db.changeUserType(req.body, payload.id)
+		res.status(200).send("Usuario actualizado")
 	}catch(err){
 		console.log(err)
 		res.status(500).send('error del servidor')
@@ -114,7 +114,7 @@ app.patch('/api/changeUserType', tokenVerification.forSysAdmins, async (req, res
 
 app.get('/api/getAllChangeLogs', tokenVerification.forSysAdmins, async (req, res) => {
 	try{
-		let dbResponse = await db.getLogs()
+		const dbResponse = await db.getLogs()
 		res.status(200).send(dbResponse)
 	}catch(err){
 		console.log(err)
