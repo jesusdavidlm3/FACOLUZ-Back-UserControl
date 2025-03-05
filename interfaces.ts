@@ -1,11 +1,11 @@
 export interface loginData{
-    identification: string,
+    id: number,
     passwordHash: string
 }
 
 export interface newUser{
     idType: number,
-    idNumber: string,
+    id: number,
     name: string,
     lastname: string,
     password: string,

@@ -41,8 +41,9 @@ async function execute(query: string, params?: object) {
 }
 
 export async function login(data: t.loginData){
-	const {identification} = data
-	const res = await query('SELECT * FROM users WHERE identification = ?', [identification])
+	const id = data.id
+	console.log(id)
+	const res = await query('SELECT * FROM users WHERE id = ?', [id])
 	return res
 }
 
@@ -56,50 +57,49 @@ export async function getDeactivatedUsers() {
 	return res
 }
 
-export async function createUser(data: t.newUser, currentUser: string) {
+export async function createUser(data: t.newUser, currentUser: number) {
 	console.log(data)
-	const {idType, idNumber, name, lastname, password, userType} = data
-	const uid = crypto.randomUUID()
+	const {id, idType, name, lastname, password, userType} = data
 	const res = await query(`
-		INSERT INTO users(id, name, lastname, passwordSHA256, type, identification, identificationType) VALUES(?, ?, ?, ?, ?, ?, ?)
-	`, [uid, name, lastname, password, userType, idNumber, idType])
-	generateLogs(0, uid, currentUser)
+		INSERT INTO users(id, name, lastname, passwordSHA256, type, identificationType) VALUES(?, ?, ?, ?, ?, ?)
+	`, [id, name, lastname, password, userType, idType])
+	generateLogs(0, id, currentUser)
 	return res
 }
 
-export async function deleteUser(id: string, currentUser: string){
+export async function deleteUser(id: number, currentUser: number){
 	const res = await query("UPDATE users SET active = 0 WHERE id = ?", [id])
 	generateLogs(1, id, currentUser)
 	return res
 }
 
-export async function reactivateUser(data: {id: string, newPassword: string}, currentUser: string){
+export async function reactivateUser(data: {id: number, newPassword: string}, currentUser: number){
 	const {id, newPassword} = data
 	const res = await execute("UPDATE users SET active = 1, passwordSHA256 = ? WHERE id = ?", [newPassword, id])
 	generateLogs(2, id, currentUser)
 	return res
 }
 
-export async function changePassword(data: {userId: string, newPassword: string}, currentUser: string) {
+export async function changePassword(data: {userId: number, newPassword: string}, currentUser: number) {
 	const {userId, newPassword} = data
 	const res = await execute("UPDATE users SET passwordSHA256 = ? WHERE id = ?", [newPassword, userId])
 	generateLogs(3, userId, currentUser)
 	return res
 }
 
-export async function changeUserType(data: {userId: string, newType: 0 | 1 | 2 | 3}, currentUser: string) {
+export async function changeUserType(data: {userId: number, newType: 0 | 1 | 2 | 3}, currentUser: number) {
 	const { userId, newType } = data
 	const res = await execute("UPDATE users SET type = ? WHERE id = ?", [newType, userId])
 	generateLogs(4, userId, currentUser)
 	return res
 }
 
-async function generateLogs(changeType: 0 | 1 | 2 | 3 | 4, modificated: string, modificator: string){
+async function generateLogs(changeType: 0 | 1 | 2 | 3 | 4, modificated: number, modificator: number){
 	const uid = crypto.randomUUID()
 	const dateTime = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()} ${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`
 	
 	const _res = await execute(`
-		INSERT INTO changelogs(id, changetype, datetime, usermodificatorId, usermodificatedId) VALUES(?, ?, ?, ?, ?)
+		INSERT INTO changelogs(id, changetype, datetime, usermodificatorId, usermodificatedId) VALUES(UNHEX(REPLACE(?, '-', '')), ?, ?, ?, ?)
 	`, [uid, changeType, dateTime, modificator, modificated])
 }
 
