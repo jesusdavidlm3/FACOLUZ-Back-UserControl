@@ -46,9 +46,42 @@ app.get('/api/getAllUsers', tokenVerification.forSysAdmins, async (req, res) => 
 	res.status(200).send(dbResponse)
 })
 
+app.get('/api/getSearchedUsers/:searchParam', tokenVerification.forSysAdmins, async (req, res) => {
+	const searchParam = req.params.searchParam
+	try{
+		const dbResponse = await db.getSearchedUsers(searchParam)
+		res.status(200).send(dbResponse)
+	}catch(err){
+		console.log(err)
+		res.status(404).send('Usuario no encontrado')
+	}
+})
+
+app.get('/api/getSearchedSDeactivatedUsers/:searchParam', tokenVerification.forSysAdmins, async (req, res) => {
+	const searchParam = req.params.searchParam
+	try{
+		const dbResponse = await db.getSearchedSDeactivatedUsers(searchParam)
+		res.status(200).send(dbResponse)
+	}catch(err){
+		console.log(err)
+		res.status(404).send('Usuario no encontrado')
+	}
+})
+
 app.get('/api/getDeactivatedUsers', tokenVerification.forSysAdmins, async (req, res) => {
 	const dbResponse = await db.getDeactivatedUsers()
 	res.status(200).send(dbResponse)
+})
+
+app.get('/api/getIdUsers/:idParam', tokenVerification.forSysAdmins, async (req, res) => {
+	const idParam = req.params.idParam
+	try {
+		const dbResponse = await db.getIdUsers(idParam)
+		res.status(200).send(dbResponse)
+	} catch (err) {
+		console.log(err)
+		res.status(404).send('Usuario no encontrado')
+	}
 })
 
 app.post('/api/createUser', tokenVerification.forSysAdmins, async (req, res) => {

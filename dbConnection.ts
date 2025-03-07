@@ -52,13 +52,39 @@ export async function getAllUsers() {
 	return res
 }
 
+export async function getSearchedUsers(searchParam: string){	
+	const searchParamWith = `${searchParam}%`
+	if (isNaN(Number(searchParam))) {
+		const res = await query("SELECT * FROM users WHERE active = 1 AND (name LIKE ? OR lastname LIKE ?)", [ searchParamWith, searchParamWith])
+		return res	
+	} else {
+		const res = await query("SELECT * FROM users WHERE active = 1 AND id LIKE ?", [Number(searchParam)])
+		return res
+	}
+}
+
+export async function getSearchedSDeactivatedUsers(searchParam: string){	
+	const searchParamWith = `${searchParam}%`
+	if (isNaN(Number(searchParam))) {
+		const res = await query("SELECT * FROM users WHERE active = 0 AND (name LIKE ? OR lastname LIKE ?)", [ searchParamWith, searchParamWith])
+		return res	
+	} else {
+		const res = await query("SELECT * FROM users WHERE active = 0 AND id LIKE ?", [Number(searchParam)])
+		return res
+	}
+}
+
 export async function getDeactivatedUsers() {
 	const res = await query('SELECT * FROM users WHERE active = 0')
 	return res
 }
 
+export async function getIdUsers(idParam: number) {
+	const res = await query('SELECT * FROM users WHERE id = ?', [idParam])
+	return res
+}
+
 export async function createUser(data: t.newUser, currentUser: number) {
-	console.log(data)
 	const {id, idType, name, lastname, password, userType} = data
 	const res = await query(`
 		INSERT INTO users(id, name, lastname, passwordSHA256, type, identificationType) VALUES(?, ?, ?, ?, ?, ?)
