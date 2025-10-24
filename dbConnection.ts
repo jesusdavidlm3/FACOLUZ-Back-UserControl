@@ -131,10 +131,17 @@ async function generateLogs(changeType: 0 | 1 | 2 | 3 | 4, modificated: number, 
 
 export async function getLogs() {
 	const res = await query(`
-		SELECT changelogs.dateTime, changelogs.changeType, modificated.name AS modificatedName, modificated.lastname AS modificatedLastname, modificator.name AS modificatorName, modificator.lastname AS modificatorLastname
+		SELECT
+			changelogs.dateTime,
+			changelogs.changeType,
+			modificated.name AS modificatedName,
+			modificated.lastname AS modificatedLastname,
+			modificator.name AS modificatorName,
+			modificator.lastname AS modificatorLastname
 		FROM changelogs
 		JOIN users AS modificated ON changelogs.userModificatedId = modificated.id
 		JOIN users AS modificator ON changelogs.userModificatorId = modificator.id
+		ORDER BY changelogs.dateTime DESC 
 	`)
 	return res
 }
