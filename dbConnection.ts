@@ -66,28 +66,28 @@ export async function getSearchedUsers(searchParam: string, page: number){
 			SELECT * FROM users
 			WHERE active = 1 AND id LIKE ?
 			LIMIT 10 OFFSET ?
-		`, [Number(searchParam), (page-1)*10])
+		`, [searchParamWith, (page-1)*10])
 		return res
 	}
 }
 
 export async function getSearchedSDeactivatedUsers(searchParam: string, page: number){	
 	const searchParamWith = `${searchParam}%`
+	let res
 	if (isNaN(Number(searchParam))) {
-		const res = await query(`
+		res = await query(`
 			SELECT * FROM users
 			WHERE active = 0 AND (name LIKE ? OR lastname LIKE ?)
 			LIMIT 10 OFFSET ?	
 		`, [ searchParamWith, searchParamWith, (page-1)*10])
-		return res	
 	} else {
-		const res = await query(`
+		res = await query(`
 			SELECT * FROM users
 			WHERE active = 0 AND id LIKE ?
 			LIMIT 10 OFFSET ?
-		`, [Number(searchParam), (page-1)*10])
-		return res
+		`, [searchParamWith, (page-1)*10])
 	}
+	return res
 }
 
 export async function getDeactivatedUsers(page: number) {
