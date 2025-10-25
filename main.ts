@@ -41,15 +41,17 @@ app.post('/api/login', async (req, res) => {
 	}
 })
 
-app.get('/api/getAllUsers', tokenVerification.forSysAdmins, async (req, res) => {
-	const dbResponse = await db.getAllUsers()
+app.get('/api/getAllUsers/:page', tokenVerification.forSysAdmins, async (req, res) => {
+	const page = Number(req.params.page)
+	const dbResponse = await db.getAllUsers(page)
 	res.status(200).send(dbResponse)
 })
 
-app.get('/api/getSearchedUsers/:searchParam', tokenVerification.forSysAdmins, async (req, res) => {
+app.get('/api/getSearchedUsers/:searchParam/:page', tokenVerification.forSysAdmins, async (req, res) => {
 	const searchParam = req.params.searchParam
+	const page = Number(req.params.page)
 	try{
-		const dbResponse = await db.getSearchedUsers(searchParam)
+		const dbResponse = await db.getSearchedUsers(searchParam, page)
 		res.status(200).send(dbResponse)
 	}catch(err){
 		console.log(err)
@@ -57,10 +59,11 @@ app.get('/api/getSearchedUsers/:searchParam', tokenVerification.forSysAdmins, as
 	}
 })
 
-app.get('/api/getSearchedSDeactivatedUsers/:searchParam', tokenVerification.forSysAdmins, async (req, res) => {
+app.get('/api/getSearchedSDeactivatedUsers/:searchParam/:page', tokenVerification.forSysAdmins, async (req, res) => {
 	const searchParam = req.params.searchParam
+	const page = Number(req.params.page)
 	try{
-		const dbResponse = await db.getSearchedSDeactivatedUsers(searchParam)
+		const dbResponse = await db.getSearchedSDeactivatedUsers(searchParam, page)
 		res.status(200).send(dbResponse)
 	}catch(err){
 		console.log(err)
@@ -68,8 +71,9 @@ app.get('/api/getSearchedSDeactivatedUsers/:searchParam', tokenVerification.forS
 	}
 })
 
-app.get('/api/getDeactivatedUsers', tokenVerification.forSysAdmins, async (req, res) => {
-	const dbResponse = await db.getDeactivatedUsers()
+app.get('/api/getDeactivatedUsers/:page', tokenVerification.forSysAdmins, async (req, res) => {
+	const page = Number(req.params.page)
+	const dbResponse = await db.getDeactivatedUsers(page)
 	res.status(200).send(dbResponse)
 })
 
@@ -145,9 +149,10 @@ app.patch('/api/changeUserType', tokenVerification.forSysAdmins, async (req, res
 	}
 })
 
-app.get('/api/getAllChangeLogs', tokenVerification.forSysAdmins, async (req, res) => {
+app.get('/api/getAllChangeLogs/:page', tokenVerification.forSysAdmins, async (req, res) => {
 	try{
-		const dbResponse = await db.getLogs()
+		const page: number = Number(req.params.page)
+		const dbResponse = await db.getLogs(page)
 		res.status(200).send(dbResponse)
 	}catch(err){
 		console.log(err)

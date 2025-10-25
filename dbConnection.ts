@@ -47,35 +47,51 @@ export async function login(data: t.loginData){
 	return res
 }
 
-export async function getAllUsers() {
-	const res = await query('SELECT * FROM users WHERE active = 1')
+export async function getAllUsers(page: number) {
+	const res = await query('SELECT * FROM users WHERE active = 1 LIMIT 10 OFFSET ?', [(page-1)*10])
 	return res
 }
 
-export async function getSearchedUsers(searchParam: string){	
+export async function getSearchedUsers(searchParam: string, page: number){	
 	const searchParamWith = `${searchParam}%`
 	if (isNaN(Number(searchParam))) {
-		const res = await query("SELECT * FROM users WHERE active = 1 AND (name LIKE ? OR lastname LIKE ?)", [ searchParamWith, searchParamWith])
+		const res = await query(`
+			SELECT * FROM users
+			WHERE active = 1 AND (name LIKE ? OR lastname LIKE ?)
+			LIMIT 10 OFFSET ?
+		`, [ searchParamWith, searchParamWith, (page-1)*10])
 		return res	
 	} else {
-		const res = await query("SELECT * FROM users WHERE active = 1 AND id LIKE ?", [Number(searchParam)])
+		const res = await query(`
+			SELECT * FROM users
+			WHERE active = 1 AND id LIKE ?
+			LIMIT 10 OFFSET ?
+		`, [Number(searchParam), (page-1)*10])
 		return res
 	}
 }
 
-export async function getSearchedSDeactivatedUsers(searchParam: string){	
+export async function getSearchedSDeactivatedUsers(searchParam: string, page: number){	
 	const searchParamWith = `${searchParam}%`
 	if (isNaN(Number(searchParam))) {
-		const res = await query("SELECT * FROM users WHERE active = 0 AND (name LIKE ? OR lastname LIKE ?)", [ searchParamWith, searchParamWith])
+		const res = await query(`
+			SELECT * FROM users
+			WHERE active = 0 AND (name LIKE ? OR lastname LIKE ?)
+			LIMIT 10 OFFSET ?	
+		`, [ searchParamWith, searchParamWith, (page-1)*10])
 		return res	
 	} else {
-		const res = await query("SELECT * FROM users WHERE active = 0 AND id LIKE ?", [Number(searchParam)])
+		const res = await query(`
+			SELECT * FROM users
+			WHERE active = 0 AND id LIKE ?
+			LIMIT 10 OFFSET ?
+		`, [Number(searchParam), (page-1)*10])
 		return res
 	}
 }
 
-export async function getDeactivatedUsers() {
-	const res = await query('SELECT * FROM users WHERE active = 0')
+export async function getDeactivatedUsers(page: number) {
+	const res = await query('SELECT * FROM users WHERE active = 0 LIMIT 10 OFFSET ?', [(page-1)*10])
 	return res
 }
 
@@ -129,7 +145,7 @@ async function generateLogs(changeType: 0 | 1 | 2 | 3 | 4, modificated: number, 
 	`, [uid, changeType, dateTime, modificator, modificated])
 }
 
-export async function getLogs() {
+export async function getLogs(page: number) {
 	const res = await query(`
 		SELECT
 			changelogs.dateTime,
@@ -141,7 +157,8 @@ export async function getLogs() {
 		FROM changelogs
 		JOIN users AS modificated ON changelogs.userModificatedId = modificated.id
 		JOIN users AS modificator ON changelogs.userModificatorId = modificator.id
-		ORDER BY changelogs.dateTime DESC 
-	`)
+		ORDER BY changelogs.dateTime DESC
+		LIMIT 10 OFFSET ?
+	`, [(page-1)*10])
 	return res
 }
